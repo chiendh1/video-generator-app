@@ -1,0 +1,77 @@
+.container {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.inner {
+  width: 100%;
+  will-change: transform;
+  transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ── individual transcript line ── */
+
+.line {
+  padding: 12px 28px 12px 28px;
+  margin-bottom: 6px;
+  border-left: 4px solid transparent;
+  border-radius: 12px;
+  transition:
+    font-size 0.3s ease,
+    opacity 0.3s ease,
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    padding 0.3s ease,
+    margin 0.3s ease;
+}
+
+.speakerLabel {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.text {
+  line-height: 1.5;
+  color: #f0ede8;
+  overflow-wrap: break-word;
+}
+
+/* ── states ── */
+
+.active {
+  font-size: 26px;
+  opacity: 1;
+  padding: 22px 32px 22px 28px;
+  margin: 14px 0;
+  border-radius: 0 14px 14px 0;
+}
+
+.active .text {
+  font-weight: 500;
+}
+
+.prev {
+  font-size: 20px;
+  opacity: 0.5;
+}
+
+.next {
+  font-size: 26px;
+  opacity: 0.44;
+}
+
+.past {
+  font-size: 20px;
+  opacity: 0.22;
+}
+
+.future {
+  font-size: 20px;
+  opacity: 0.18;
+}

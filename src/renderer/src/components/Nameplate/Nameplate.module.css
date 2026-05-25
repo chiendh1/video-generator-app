@@ -1,0 +1,73 @@
+.root {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  transition: border-color 0.4s;
+}
+
+.rootAmber {
+  border-color: rgba(239, 159, 39, 0.25);
+}
+
+.rootTeal {
+  border-color: rgba(20, 184, 166, 0.25);
+}
+
+.avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 600;
+  flex-shrink: 0;
+  transition:
+    background 0.4s,
+    box-shadow 0.4s;
+}
+
+.avatarAmber {
+  background: rgba(239, 159, 39, 0.2);
+  color: #ef9f27;
+  box-shadow: 0 0 20px rgba(239, 159, 39, 0.3);
+}
+
+.avatarTeal {
+  background: rgba(20, 184, 166, 0.2);
+  color: #14b8a6;
+  box-shadow: 0 0 20px rgba(20, 184, 166, 0.3);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(240, 237, 232, 0.4);
+}
+
+.name {
+  font-size: 20px;
+  font-weight: 600;
+  transition: color 0.4s;
+}
+
+.nameAmber {
+  color: #ef9f27;
+}
+
+.nameTeal {
+  color: #14b8a6;
+}

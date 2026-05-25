@@ -1,0 +1,25 @@
+.root {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 72px;
+}
+
+.bar {
+  width: 5px;
+  border-radius: 3px 3px 1px 1px;
+  transform-origin: bottom center;
+  animation: wave var(--dur, 0.9s) ease-in-out infinite alternate;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes wave {
+  from {
+    transform: scaleY(0.15);
+    opacity: 0.5;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}

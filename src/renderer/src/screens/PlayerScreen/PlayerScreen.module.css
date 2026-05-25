@@ -1,0 +1,306 @@
+/* ── Viewport: fills the window and centers the scaled canvas ── */
+.viewport {
+  width: 100vw;
+  height: 100vh;
+  background: #0d0b1e;
+  overflow: scroll;
+  position: relative;
+}
+
+.viewport.recording,
+.viewport.recording * {
+  cursor: none !important;
+}
+
+.hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ── Fixed 1920×1080 canvas — transform is applied via inline style ── */
+.playerRoot {
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: #0d0b1e;
+  display: grid;
+  grid-template-columns: 600px 1fr; /* 40 / 60 */
+}
+
+.separator {
+  position: absolute;
+  left: 600px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+/* ── Left panel (40% = 600px) ── */
+
+.leftPanel {
+  padding: 60px 64px 60px 64px;
+  display: flex;
+  flex-direction: column;
+  /* justify-content: center; */
+  gap: 24px;
+}
+
+.backBtn {
+  align-self: flex-start;
+  background: none;
+  border: 1px solid rgba(240, 237, 232, 0.18);
+  border-radius: 8px;
+  color: rgba(240, 237, 232, 0.5);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 14px;
+  transition:
+    color 0.2s,
+    border-color 0.2s;
+}
+
+.backBtn:hover {
+  border-color: rgba(240, 237, 232, 0.45);
+  color: #f0ede8;
+}
+
+.channelRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.channelDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(240, 237, 232, 0.45);
+  flex-shrink: 0;
+}
+
+.channelName {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(240, 237, 232, 0.5);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.topBadgeRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.liveBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(239, 159, 39, 0.14);
+  border: 1px solid rgba(239, 159, 39, 0.35);
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ef9f27;
+}
+
+.liveBadgeDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ef9f27;
+  flex-shrink: 0;
+  animation: livePulse 1.8s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(0.65);
+  }
+}
+
+.topTagBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 18px;
+  border: 1.5px solid rgba(20, 184, 166, 0.55);
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #14b8a6;
+  background: transparent;
+}
+
+.episodeLabel {
+  font-size: 20px;
+  font-weight: 700;
+  color: #818cf8;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: -10px;
+}
+
+.episodeTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 50px;
+  font-weight: 700;
+  color: #f0ede8;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.description {
+  font-size: 15px;
+  color: rgba(240, 237, 232, 0.48);
+  line-height: 1.65;
+}
+
+.bottomBadgeRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bottomTagBadge {
+  padding: 6px 18px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.badgeIndigo {
+  background: rgba(99, 102, 241, 0.16);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.35);
+}
+
+.badgeRose {
+  border: 1.5px solid rgba(244, 63, 94, 0.4);
+  color: #fda4af;
+  background: transparent;
+}
+
+/* ── Right panel (60% = 900px) ── */
+
+.rightPanel {
+  padding: 72px 100px 72px 72px;
+  display: flex;
+  flex-direction: column;
+}
+
+.transcriptHeader {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 48px;
+  flex-shrink: 0;
+}
+
+.transcriptLabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(240, 237, 232, 0.32);
+  flex-shrink: 0;
+}
+
+.transcriptDivider {
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.counter {
+  flex-shrink: 0;
+  text-align: right;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: rgba(240, 237, 232, 0.28);
+  padding-top: 20px;
+}
+
+/* ── Cancel button ── */
+
+.cancelBtn {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 300;
+  padding: 10px 24px;
+  background: rgba(220, 38, 38, 0.15);
+  border: 1px solid rgba(220, 38, 38, 0.45);
+  border-radius: 999px;
+  color: #fca5a5;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+  backdrop-filter: blur(12px);
+  letter-spacing: 0.02em;
+}
+
+.cancelBtn:hover {
+  background: rgba(220, 38, 38, 0.28);
+  border-color: rgba(220, 38, 38, 0.7);
+}
+
+.cancelBtn:active {
+  transform: translateX(-50%) scale(0.97);
+}
+
+/* ── Countdown overlay ── */
+
+.countdownOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(13, 11, 30, 0.72);
+}
+
+.countdownNumber {
+  font-family: 'Playfair Display', serif;
+  font-size: 320px;
+  font-weight: 700;
+  color: #f0ede8;
+  line-height: 1;
+  animation: countdownTick 1s ease-in-out forwards;
+}
+
+@keyframes countdownTick {
+  0% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+  18% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  72% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.78);
+  }
+}
