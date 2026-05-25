@@ -50,7 +50,6 @@ export function TranscriptPanel({
   const lineRefs = useRef<(HTMLDivElement | null)[]>([])
   const innerRef = useRef<HTMLDivElement>(null)
   const [translateY, setTranslateY] = useState(0)
-  console.log('🚀 ~ TranscriptPanel ~ translateY:', translateY)
   const didInit = useRef(false)
 
   useLayoutEffect(() => {
@@ -58,9 +57,7 @@ export function TranscriptPanel({
 
     const center = (): void => {
       const container = containerRef.current
-      console.log('🚀 ~ center ~ container:', container?.clientHeight)
       const activeLine = lineRefs.current[activeIdx]
-      console.log('🚀 ~ center ~ activeLine:', activeLine?.offsetTop, activeLine?.clientHeight)
       if (!container || !activeLine) return
       setTranslateY(500 / 2 - activeLine.offsetTop - activeLine.clientHeight / 2)
     }

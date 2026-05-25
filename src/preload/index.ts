@@ -33,5 +33,9 @@ contextBridge.exposeInMainWorld('api', {
     ): void => callback(line)
     ipcRenderer.on('log-update', handler)
     return () => ipcRenderer.removeListener('log-update', handler)
-  }
+  },
+  readFile: (filePath: string) => ipcRenderer.invoke('read-file', filePath),
+  selectFolder: () => ipcRenderer.invoke('select-folder'),
+  mergeAudioFolder: (folderPath: string) =>
+    ipcRenderer.invoke('merge-audio-folder', folderPath)
 })

@@ -108,8 +108,9 @@ export function PlayerScreen({
   }
 
   const audioFilePath = useMemo(
-    () => (config.audioFile ? window.api.getPathForFile(config.audioFile) : ''),
-    [config.audioFile]
+    () =>
+      config.audioFilePath ?? (config.audioFile ? window.api.getPathForFile(config.audioFile) : ''),
+    [config.audioFile, config.audioFilePath]
   )
 
   const { isRecording, isConverting, startRecording, stopRecording, cancelAll } = useRecorder(
