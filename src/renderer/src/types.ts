@@ -5,6 +5,8 @@ export interface Cue {
   speaker: string | null
 }
 
+export type Resolution = '1920x1080' | '1280x720'
+
 export interface Config {
   channel: string
   episode: string
@@ -14,6 +16,7 @@ export interface Config {
   audioFile: File | null
   audioFilePath?: string
   transcript: string
+  resolution: Resolution
 }
 
 export type SpeakerColorSlot = 'indigo' | 'teal'
@@ -51,6 +54,8 @@ declare global {
       mergeAudioFolder: (
         folderPath: string
       ) => Promise<{ outputPath: string; fileCount: number }>
+      enterPlayerScreen: () => void
+      leavePlayerScreen: () => void
     }
   }
 }

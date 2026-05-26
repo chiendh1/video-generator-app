@@ -61,29 +61,46 @@ export function PlayerScreen({
     duration: syncDuration
   } = useTranscriptSync(audioRef, cues)
 
-  // IPC-driven sync (capture mode)
+  // IPC-driven sync (capture mode).
+  // Time and duration are stored in refs so IPC messages don't trigger
+  // re-renders on every frame. State is only updated when the active cue
+  // index changes (rare) or at 5 fps for the progress bar.
+  const captureTimeRef = useRef(0)
+  const captureDurRef = useRef(0)
+  const captureIdxRef = useRef(-1)
   const [captureCurrentTime, setCaptureCurrentTime] = useState(0)
   const [captureDuration, setCaptureDuration] = useState(0)
+  const [captureActiveIdx, setCaptureActiveIdx] = useState(-1)
 
   useEffect(() => {
     if (!captureMode) return
     return window.api.onPlaybackSync((time, dur) => {
-      setCaptureCurrentTime(time)
-      setCaptureDuration(dur)
-    })
-  }, [captureMode])
-
-  const captureActiveIdx = useMemo(() => {
-    if (!captureMode) return -1
-    let idx = -1
-    for (let i = cues.length - 1; i >= 0; i--) {
-      if (captureCurrentTime >= cues[i].start) {
-        idx = i
-        break
+      captureTimeRef.current = time
+      if (dur !== captureDurRef.current) {
+        captureDurRef.current = dur
+        setCaptureDuration(dur)
       }
-    }
-    return idx
-  }, [captureMode, captureCurrentTime, cues])
+      let idx = -1
+      for (let i = cues.length - 1; i >= 0; i--) {
+        if (time >= cues[i].start) {
+          idx = i
+          break
+        }
+      }
+      if (idx !== captureIdxRef.current) {
+        captureIdxRef.current = idx
+        setCaptureActiveIdx(idx)
+      }
+    })
+  }, [captureMode, cues])
+
+  // Update the progress bar at 5 fps — frequent enough to look smooth,
+  // cheap enough not to saturate the software renderer.
+  useEffect(() => {
+    if (!captureMode) return
+    const id = setInterval(() => setCaptureCurrentTime(captureTimeRef.current), 200)
+    return () => clearInterval(id)
+  }, [captureMode])
 
   const activeIdx = captureMode ? captureActiveIdx : syncActiveIdx
   const currentTime = captureMode ? captureCurrentTime : syncTime
@@ -104,7 +121,8 @@ export function PlayerScreen({
     episodeNumber: config.episodeNumber,
     description: config.description,
     level: config.level,
-    transcript: config.transcript
+    transcript: config.transcript,
+    resolution: config.resolution
   }
 
   const audioFilePath = useMemo(
@@ -121,16 +139,18 @@ export function PlayerScreen({
   )
 
   // Broadcast playback position to the capture window — preview mode only.
-  // Uses RAF instead of timeupdate so the capture window gets updates every
-  // ~16 ms rather than ~250 ms, keeping visual and audio in sync.
+  // Throttled to 30 fps (≈33 ms) to match the recording frame rate and avoid
+  // flooding IPC, while still giving sub-frame sync accuracy.
   useEffect(() => {
     if (captureMode) return
     const el = audioRef.current
     if (!el) return
     let rafId: number
-    const tick = (): void => {
-      if (!el.paused) {
+    let lastBroadcast = 0
+    const tick = (now: number): void => {
+      if (!el.paused && now - lastBroadcast >= 33) {
         window.api.broadcastPlayback(el.currentTime, isFinite(el.duration) ? el.duration : 0)
+        lastBroadcast = now
       }
       rafId = requestAnimationFrame(tick)
     }

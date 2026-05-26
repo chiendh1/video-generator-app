@@ -255,6 +255,41 @@
   border-radius: 8px;
 }
 
+.segmented {
+  display: flex;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.segBtn {
+  flex: 1;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(240, 237, 232, 0.4);
+  background: rgba(255, 255, 255, 0.04);
+  border: none;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.segBtn + .segBtn {
+  border-left: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.segBtn:hover:not(.segBtnActive) {
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(240, 237, 232, 0.65);
+}
+
+.segBtnActive {
+  background: rgba(99, 102, 241, 0.18);
+  color: #a5b4fc;
+}
+
 .startBtn {
   margin-top: 32px;
   width: 100%;

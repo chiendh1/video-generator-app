@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Config } from '../../types'
+import { Config, Resolution } from '../../types'
 import styles from './SetupScreen.module.css'
 
 interface Props {
@@ -15,6 +15,7 @@ export function SetupScreen({ onStart }: Props): React.JSX.Element {
   const [audioFile, setAudioFile] = useState<File | null>(null)
   const [srtFile, setSrtFile] = useState<File | null>(null)
   const [transcript, setTranscript] = useState('')
+  const [resolution, setResolution] = useState<Resolution>('1920x1080')
   const [error, setError] = useState('')
   const [isGeneratingSrt, setIsGeneratingSrt] = useState(false)
   const [mergeFolder, setMergeFolder] = useState<string | null>(null)
@@ -139,7 +140,8 @@ export function SetupScreen({ onStart }: Props): React.JSX.Element {
       level: level.trim(),
       audioFile,
       ...(mergedAudioPath ? { audioFilePath: mergedAudioPath } : {}),
-      transcript
+      transcript,
+      resolution
     })
   }
 
@@ -207,6 +209,21 @@ export function SetupScreen({ onStart }: Props): React.JSX.Element {
               placeholder="e.g. Beginner · Conversation · Dialogue"
             />
           </label>
+
+          <div className={styles.field}>
+            <span>Output Resolution</span>
+            <div className={styles.segmented}>
+              {(['1920x1080', '1280x720'] as Resolution[]).map((r) => (
+                <button
+                  key={r}
+                  className={`${styles.segBtn} ${resolution === r ? styles.segBtnActive : ''}`}
+                  onClick={() => setResolution(r)}
+                >
+                  {r === '1920x1080' ? 'Full HD  1920×1080' : 'HD  1280×720'}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <div className={styles.field}>
             <span>Merge Audio from Folder (optional)</span>

@@ -24,6 +24,7 @@ let offscreenWindow: BrowserWindow | null = null
 let offscreenFfmpegProc: ReturnType<typeof spawn> | null = null
 let offscreenFfmpegDone: Promise<string> | null = null
 let offscreenPaintOff: (() => void) | null = null
+let recordingResolution = '1920x1080'
 
 type LogStep = 'srt' | 'mp4' | 'system'
 type LogLevel = 'info' | 'error'
@@ -89,14 +90,15 @@ function findBinary(name: string): string {
   throw new Error(`'${name}' not found. Install with: pip install openai-whisper`)
 }
 
+const SETUP_W = 820
+const SETUP_H = 880
+
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
-    width: WIDTH,
-    height: HEIGHT,
+    width: SETUP_W,
+    height: SETUP_H,
     resizable: false,
     show: false,
-    // fullscreen: true,
-
     autoHideMenuBar: true,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -132,6 +134,25 @@ app.whenReady().then(() => {
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
+  })
+
+  // ── Window resize for screen transitions ────────────────────────────────
+  ipcMain.on('enter-player-screen', () => {
+    if (appWindow && !appWindow.isDestroyed()) {
+      appWindow.setResizable(true)
+      appWindow.setSize(WIDTH, HEIGHT)
+      appWindow.setResizable(false)
+      appWindow.center()
+    }
+  })
+
+  ipcMain.on('leave-player-screen', () => {
+    if (appWindow && !appWindow.isDestroyed()) {
+      appWindow.setResizable(true)
+      appWindow.setSize(SETUP_W, SETUP_H)
+      appWindow.setResizable(false)
+      appWindow.center()
+    }
   })
 
   // ── Existing source lookup (kept for debug / fallback) ──────────────────
@@ -317,6 +338,7 @@ app.whenReady().then(() => {
   // ── Offscreen rendering → ffmpeg stdin ──────────────────────────────────
   ipcMain.handle('start-offscreen-recording', async (_, config: unknown, cues: unknown) => {
     recordingData = { config, cues }
+    recordingResolution = (config as { resolution?: string }).resolution ?? '1920x1080'
 
     if (offscreenWindow && !offscreenWindow.isDestroyed()) {
       offscreenWindow.close()
@@ -366,11 +388,12 @@ app.whenReady().then(() => {
     })
 
     const { w: pixW, h: pixH } = actualSize
-    const needsScale = pixW !== WIDTH || pixH !== HEIGHT
+    const [outW, outH] = recordingResolution.split('x').map(Number)
+    const needsScale = pixW !== outW || pixH !== outH
     sendLog(
       'mp4',
       'info',
-      `OSR pixel size: ${pixW}×${pixH}${needsScale ? ` → scale ${WIDTH}×${HEIGHT}` : ''}`
+      `OSR pixel size: ${pixW}×${pixH}${needsScale ? ` → scale ${outW}×${outH}` : ''}`
     )
 
     const tempMp4 = join(tmpdir(), `esl-osr-${Date.now()}.mp4`)
@@ -388,7 +411,7 @@ app.whenReady().then(() => {
       '30',
       '-i',
       'pipe:0',
-      ...(needsScale ? ['-vf', `scale=${WIDTH}:${HEIGHT}:flags=lanczos`] : []),
+      ...(needsScale ? ['-vf', `scale=${outW}:${outH}:flags=lanczos`] : []),
       '-c:v',
       'libx264',
       '-preset',
@@ -478,7 +501,7 @@ app.whenReady().then(() => {
               '-i',
               audioFilePath,
               '-filter_complex',
-              `[0:v]scale=${WIDTH}:${HEIGHT}:flags=lanczos,setsar=1[v0];[v0][0:a][1:v][2:a]concat=n=2:v=1:a=1[v][a]`,
+              `[0:v]scale=${recordingResolution.replace('x', ':')}:flags=lanczos,setsar=1[v0];[v0][0:a][1:v][2:a]concat=n=2:v=1:a=1[v][a]`,
               '-map',
               '[v]',
               '-map',

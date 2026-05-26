@@ -38,12 +38,22 @@ function App(): React.JSX.Element {
 
   if (isRecordingMode) return <CaptureWindow />
 
+  const handleStart = (cfg: Config): void => {
+    window.api.enterPlayerScreen()
+    setConfig(cfg)
+  }
+
+  const handleBack = (): void => {
+    window.api.leavePlayerScreen()
+    setConfig(null)
+  }
+
   return (
     <>
       {!config ? (
-        <SetupScreen onStart={setConfig} />
+        <SetupScreen onStart={handleStart} />
       ) : (
-        <PlayerScreen config={config} cues={cues} onBack={() => setConfig(null)} />
+        <PlayerScreen config={config} cues={cues} onBack={handleBack} />
       )}
       <LogPanel logs={logs} onClear={() => setLogs([])} />
     </>

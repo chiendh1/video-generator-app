@@ -37,5 +37,7 @@ contextBridge.exposeInMainWorld('api', {
   readFile: (filePath: string) => ipcRenderer.invoke('read-file', filePath),
   selectFolder: () => ipcRenderer.invoke('select-folder'),
   mergeAudioFolder: (folderPath: string) =>
-    ipcRenderer.invoke('merge-audio-folder', folderPath)
+    ipcRenderer.invoke('merge-audio-folder', folderPath),
+  enterPlayerScreen: () => ipcRenderer.send('enter-player-screen'),
+  leavePlayerScreen: () => ipcRenderer.send('leave-player-screen')
 })
