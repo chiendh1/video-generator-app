@@ -119,15 +119,22 @@ export function PlayerScreen({
     audioFilePath
   )
 
-  // Broadcast playback position to the capture window — preview mode only
+  // Broadcast playback position to the capture window — preview mode only.
+  // Uses RAF instead of timeupdate so the capture window gets updates every
+  // ~16 ms rather than ~250 ms, keeping visual and audio in sync.
   useEffect(() => {
     if (captureMode) return
     const el = audioRef.current
     if (!el) return
-    const onTime = (): void =>
-      window.api.broadcastPlayback(el.currentTime, isFinite(el.duration) ? el.duration : 0)
-    el.addEventListener('timeupdate', onTime)
-    return () => el.removeEventListener('timeupdate', onTime)
+    let rafId: number
+    const tick = (): void => {
+      if (!el.paused) {
+        window.api.broadcastPlayback(el.currentTime, isFinite(el.duration) ? el.duration : 0)
+      }
+      rafId = requestAnimationFrame(tick)
+    }
+    rafId = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafId)
   }, [captureMode])
 
   // Countdown tick

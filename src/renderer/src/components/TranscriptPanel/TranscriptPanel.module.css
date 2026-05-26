@@ -45,7 +45,7 @@
 /* ── states ── */
 
 .active {
-  font-size: 26px;
+  font-size: 30px;
   opacity: 1;
   padding: 22px 32px 22px 28px;
   margin: 14px 0;
@@ -57,21 +57,21 @@
 }
 
 .prev {
-  font-size: 20px;
+  font-size: 24px;
   opacity: 0.5;
 }
 
 .next {
-  font-size: 26px;
+  font-size: 30px;
   opacity: 0.44;
 }
 
 .past {
-  font-size: 20px;
+  font-size: 24px;
   opacity: 0.22;
 }
 
 .future {
-  font-size: 20px;
+  font-size: 24px;
   opacity: 0.18;
 }

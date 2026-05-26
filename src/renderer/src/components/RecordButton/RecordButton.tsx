@@ -20,9 +20,12 @@ export function RecordButton({ isRecording, onStart, onStop, hidden }: Props): R
       title={isRecording ? 'Stop recording' : 'Record'}
     >
       {isRecording ? (
-        <span className={styles.stopIcon} />
+        <>
+          <span className={styles.stopIcon} style={{ marginRight: 8 }} />
+          Stop recording
+        </>
       ) : (
-        <span className={styles.dots}>•••</span>
+        'Start recording'
       )}
     </button>
   )
