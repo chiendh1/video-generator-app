@@ -17,6 +17,10 @@ export function SetupScreen({ onStart }: Props): React.JSX.Element {
   const [transcript, setTranscript] = useState('')
   const [error, setError] = useState('')
   const [isGeneratingSrt, setIsGeneratingSrt] = useState(false)
+  const [mergeFolder, setMergeFolder] = useState<string | null>(null)
+  const [mergedAudioPath, setMergedAudioPath] = useState<string | null>(null)
+  const [isMerging, setIsMerging] = useState(false)
+  const [mergeStatus, setMergeStatus] = useState<string | null>(null)
 
   const srtCancelledRef = useRef(false)
 
@@ -40,6 +44,58 @@ export function SetupScreen({ onStart }: Props): React.JSX.Element {
     } finally {
       setIsGeneratingSrt(false)
       srtCancelledRef.current = false
+    }
+  }
+
+  const handleSelectMergeFolder = async (): Promise<void> => {
+    const folder = await window.api.selectFolder()
+    if (folder) {
+      setMergeFolder(folder)
+      setMergeStatus(null)
+      setMergedAudioPath(null)
+    }
+  }
+
+  const handleMergeAudio = async (): Promise<void> => {
+    if (!mergeFolder) return
+    setIsMerging(true)
+    setMergeStatus(null)
+    setError('')
+    try {
+      const { outputPath, fileCount } = await window.api.mergeAudioFolder(mergeFolder)
+      const arrayBuffer = await window.api.readFile(outputPath)
+      const fileName = outputPath.split('/').pop() ?? 'merged_audio.mp3'
+      const file = new File([arrayBuffer], fileName, { type: 'audio/mpeg' })
+      setAudioFile(file)
+      setMergedAudioPath(outputPath)
+      setMergeStatus(`Merged ${fileCount} files → ${fileName}`)
+      setIsMerging(false)
+
+      setIsGeneratingSrt(true)
+      srtCancelledRef.current = false
+      try {
+        const { srtPath, content } = await window.api.generateSrt(outputPath)
+        setTranscript(content)
+        setSrtFile(
+          new File([content], srtPath.split('/').pop() ?? 'transcript.srt', {
+            type: 'text/plain'
+          })
+        )
+      } catch (err) {
+        if (!srtCancelledRef.current) {
+          const msg = err instanceof Error ? err.message : String(err)
+          if (msg !== 'CANCELLED') setError(`SRT generation failed: ${msg}`)
+        }
+      } finally {
+        setIsGeneratingSrt(false)
+        srtCancelledRef.current = false
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      setError(`Merge failed: ${msg}`)
+    } finally {
+      setIsMerging(false)
+      setIsGeneratingSrt(false)
     }
   }
 
@@ -82,6 +138,7 @@ export function SetupScreen({ onStart }: Props): React.JSX.Element {
       description: description.trim(),
       level: level.trim(),
       audioFile,
+      ...(mergedAudioPath ? { audioFilePath: mergedAudioPath } : {}),
       transcript
     })
   }
@@ -150,6 +207,23 @@ export function SetupScreen({ onStart }: Props): React.JSX.Element {
               placeholder="e.g. Beginner · Conversation · Dialogue"
             />
           </label>
+
+          <div className={styles.field}>
+            <span>Merge Audio from Folder (optional)</span>
+            <div className={styles.mergeRow}>
+              <button className={styles.fileBtn} onClick={handleSelectMergeFolder}>
+                {mergeFolder ? `📁  ${mergeFolder.split('/').pop()}` : 'Choose folder to merge…'}
+              </button>
+              <button
+                className={styles.mergeBtn}
+                onClick={handleMergeAudio}
+                disabled={!mergeFolder || isMerging}
+              >
+                {isMerging ? 'Merging…' : 'Merge'}
+              </button>
+            </div>
+            {mergeStatus && <p className={styles.mergeStatus}>{mergeStatus}</p>}
+          </div>
 
           <div className={styles.field}>
             <span>Audio File</span>

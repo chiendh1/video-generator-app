@@ -12,6 +12,7 @@ export interface Config {
   description: string
   level: string
   audioFile: File | null
+  audioFilePath?: string
   transcript: string
 }
 
@@ -45,6 +46,11 @@ declare global {
       onLog: (callback: (line: LogLine) => void) => () => void
       startOffscreenRecording: (config: SerializableConfig, cues: Cue[]) => Promise<void>
       stopOffscreenRecording: (audioFilePath: string) => Promise<string>
+      readFile: (filePath: string) => Promise<ArrayBuffer>
+      selectFolder: () => Promise<string | null>
+      mergeAudioFolder: (
+        folderPath: string
+      ) => Promise<{ outputPath: string; fileCount: number }>
     }
   }
 }

@@ -5,7 +5,8 @@ import {
   ipcMain,
   desktopCapturer,
   screen,
-  powerSaveBlocker
+  powerSaveBlocker,
+  dialog
 } from 'electron'
 import { join, dirname, basename, extname } from 'path'
 import { writeFileSync, readFileSync, existsSync, readdirSync, unlinkSync } from 'fs'
@@ -89,13 +90,6 @@ function findBinary(name: string): string {
 }
 
 function createWindow(): void {
-  const { workAreaSize } = screen.getPrimaryDisplay()
-  console.log('🚀 ~ createWindow ~ workAreaSize:', {
-    width: workAreaSize.height * (4 / 3),
-    height: workAreaSize.height,
-    workAreaSize
-  })
-
   const mainWindow = new BrowserWindow({
     width: WIDTH,
     height: HEIGHT,
@@ -651,6 +645,92 @@ app.whenReady().then(() => {
     }
 
     return mp4Path
+  })
+
+  ipcMain.handle('read-file', async (_, filePath: string) => {
+    const buffer = readFileSync(filePath)
+    return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
+  })
+
+  ipcMain.handle('select-folder', async () => {
+    const result = await dialog.showOpenDialog({ properties: ['openDirectory'] })
+    if (result.canceled || result.filePaths.length === 0) return null
+    return result.filePaths[0]
+  })
+
+  ipcMain.handle('merge-audio-folder', async (_, folderPath: string) => {
+    const audioExts = new Set(['.mp3', '.wav', '.m4a', '.ogg', '.flac', '.aac'])
+    const files = readdirSync(folderPath)
+      .filter((f) => audioExts.has(extname(f).toLowerCase()))
+      .sort()
+      .map((f) => join(folderPath, f))
+
+    if (files.length === 0) throw new Error('No audio files found in folder')
+
+    const listFile = join(tmpdir(), `esl-concat-${Date.now()}.txt`)
+    const listContent = files.map((f) => `file '${f.replace(/'/g, "'\\''")}'`).join('\n')
+    writeFileSync(listFile, listContent)
+
+    const outputPath = join(folderPath, `merged_audio_${Date.now()}.mp3`)
+    const ffmpegBin = findBinary('ffmpeg')
+
+    sendLog('system', 'info', `Merging ${files.length} audio files → ${outputPath}`)
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const proc = spawn(ffmpegBin, [
+          '-y',
+          '-f',
+          'concat',
+          '-safe',
+          '0',
+          '-i',
+          listFile,
+          '-c:a',
+          'libmp3lame',
+          '-q:a',
+          '2',
+          outputPath
+        ])
+        runningProcs.add(proc)
+        const logErr = makeLineLogger('system', 'info')
+        proc.stderr?.on('data', (d: Buffer) => logErr(d))
+        proc.on('close', (code) => {
+          runningProcs.delete(proc)
+          try {
+            unlinkSync(listFile)
+          } catch {
+            /* ignore */
+          }
+          if (code === 0) {
+            sendLog('system', 'info', `Merged audio saved: ${outputPath}`)
+            resolve()
+          } else if (code === null) {
+            reject(new Error('CANCELLED'))
+          } else {
+            reject(new Error(`ffmpeg merge failed (code ${code})`))
+          }
+        })
+        proc.on('error', (err) => {
+          runningProcs.delete(proc)
+          try {
+            unlinkSync(listFile)
+          } catch {
+            /* ignore */
+          }
+          reject(err)
+        })
+      })
+    } catch (err) {
+      try {
+        unlinkSync(listFile)
+      } catch {
+        /* ignore */
+      }
+      throw err
+    }
+
+    return { outputPath, fileCount: files.length }
   })
 
   ipcMain.handle('cancel-all-processes', () => {

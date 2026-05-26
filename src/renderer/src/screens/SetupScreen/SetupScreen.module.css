@@ -158,6 +158,50 @@
   flex: 1;
 }
 
+.mergeRow {
+  display: flex;
+  gap: 10px;
+}
+
+.mergeRow .fileBtn {
+  flex: 1;
+}
+
+.mergeBtn {
+  background: rgba(239, 159, 39, 0.1);
+  border: 1px solid rgba(239, 159, 39, 0.35);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fcd34d;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    opacity 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.mergeBtn:hover:not(:disabled) {
+  background: rgba(239, 159, 39, 0.18);
+}
+
+.mergeBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.mergeStatus {
+  font-size: 12px;
+  color: #6ee7b7;
+  margin: 4px 0 0;
+  padding: 6px 10px;
+  background: rgba(110, 231, 183, 0.08);
+  border: 1px solid rgba(110, 231, 183, 0.2);
+  border-radius: 7px;
+}
+
 .generateBtn {
   background: rgba(20, 184, 166, 0.1);
   border: 1px solid rgba(20, 184, 166, 0.35);
