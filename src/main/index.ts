@@ -4,7 +4,6 @@ import {
   BrowserWindow,
   ipcMain,
   desktopCapturer,
-  screen,
   powerSaveBlocker,
   dialog
 } from 'electron'
@@ -441,8 +440,18 @@ app.whenReady().then(() => {
     })
 
     const onPaint = (_e: unknown, _dirty: unknown, image: Electron.NativeImage): void => {
-      if (proc.stdin && !proc.stdin.destroyed) {
-        proc.stdin.write(image.toBitmap())
+      if (!proc.stdin || proc.stdin.destroyed) return
+      const ok = proc.stdin.write(image.toBitmap())
+      if (!ok) {
+        // ffmpeg stdin buffer is full — stop generating frames until it drains
+        // to prevent unbounded memory growth and lag from frame pile-up.
+        const win = offscreenWindow
+        if (win && !win.isDestroyed()) {
+          win.webContents.stopPainting()
+          proc.stdin.once('drain', () => {
+            if (win && !win.isDestroyed()) win.webContents.startPainting()
+          })
+        }
       }
     }
 

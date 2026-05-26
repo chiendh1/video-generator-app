@@ -39,12 +39,14 @@ interface PanelProps {
   cues: Cue[]
   activeIdx: number
   speakerColorMap: Map<string, SpeakerColorSlot>
+  captureMode?: boolean
 }
 
 export function TranscriptPanel({
   cues,
   activeIdx,
-  speakerColorMap
+  speakerColorMap,
+  captureMode = false
 }: PanelProps): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null)
   const lineRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -90,7 +92,10 @@ export function TranscriptPanel({
   }
 
   return (
-    <div ref={containerRef} className={styles.container}>
+    <div
+      ref={containerRef}
+      className={`${styles.container} ${captureMode ? styles.captureMode : ''}`}
+    >
       <div
         ref={innerRef}
         className={styles.inner}

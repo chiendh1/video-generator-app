@@ -293,7 +293,12 @@ export function PlayerScreen({
             <div className={styles.transcriptDivider} />
           </div>
 
-          <TranscriptPanel cues={cues} activeIdx={activeIdx} speakerColorMap={speakerColorMap} />
+          <TranscriptPanel
+            cues={cues}
+            activeIdx={activeIdx}
+            speakerColorMap={speakerColorMap}
+            captureMode={captureMode}
+          />
 
           {counterText && <div className={styles.counter}>{counterText}</div>}
         </div>
